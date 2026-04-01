@@ -1,4 +1,6 @@
-﻿const header = document.querySelector(".site-header");
+﻿document.documentElement.classList.add("js");
+
+const header = document.querySelector(".site-header");
 const progressBar = document.querySelector(".scroll-progress");
 const hero = document.querySelector(".hero");
 const parallaxLayers = document.querySelectorAll(".parallax-layer");
@@ -7,6 +9,9 @@ const revealItems = document.querySelectorAll(".reveal, .reveal-text");
 const dot = document.querySelector(".cursor-dot");
 const ring = document.querySelector(".cursor-ring");
 const interactiveTargets = document.querySelectorAll("a, button");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isCoarsePointer = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+const enableParallax = !prefersReducedMotion && !isCoarsePointer;
 
 // Smooth section scrolling with sticky-header offset.
 document.querySelectorAll('a[href^="#"]').forEach((link) => {
@@ -27,7 +32,7 @@ document.querySelectorAll('a[href^="#"]').forEach((link) => {
 
     window.scrollTo({
       top: y,
-      behavior: "smooth",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
     });
   });
 });
@@ -40,7 +45,7 @@ if (hero) {
 }
 
 // Reveal sections and text when they enter the viewport.
-if ("IntersectionObserver" in window) {
+if ("IntersectionObserver" in window && !prefersReducedMotion) {
   const observer = new IntersectionObserver(
     (entries, obs) => {
       entries.forEach((entry) => {
@@ -53,8 +58,8 @@ if ("IntersectionObserver" in window) {
       });
     },
     {
-      threshold: 0.18,
-      rootMargin: "0px 0px -42px 0px",
+      threshold: isCoarsePointer ? 0.08 : 0.18,
+      rootMargin: isCoarsePointer ? "0px 0px -18px 0px" : "0px 0px -42px 0px",
     }
   );
 
@@ -79,6 +84,11 @@ function animateOnScroll() {
   }
 
   parallaxLayers.forEach((layer) => {
+    if (!enableParallax) {
+      layer.style.transform = "translateY(0)";
+      return;
+    }
+
     const depth = Number(layer.dataset.depth) || 0;
     layer.style.transform = `translateY(${scrollTop * depth}px)`;
   });
@@ -98,7 +108,7 @@ animateOnScroll();
 // Cursor tuning:
 // - ringEase controls how delayed the circle is. Lower = more delay.
 // - dotHoverScale and ringHoverScale control hover enlargement.
-if (dot && ring && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+if (dot && ring && !isCoarsePointer) {
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
   let ringX = mouseX;

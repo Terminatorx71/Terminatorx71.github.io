@@ -21,6 +21,7 @@
 html,
 body {
   min-height: 100%;
+  scroll-padding-top: 92px;
 }
 
 body {
@@ -43,6 +44,7 @@ body::before {
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
   mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
   opacity: 0.28;
   z-index: -2;
@@ -118,6 +120,7 @@ body::before {
 .glass-panel {
   background: linear-gradient(155deg, var(--glass), var(--glass-strong));
   border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -128,12 +131,14 @@ body::before {
   z-index: 1200;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(18, 18, 13, 0.45);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   transition: background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
 }
 
 .site-header.scrolled {
   background: rgba(24, 24, 18, 0.78);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-color: rgba(179, 255, 0, 0.18);
 }
@@ -177,15 +182,19 @@ body::before {
 
 .hero {
   min-height: calc(100vh - 76px);
+  min-height: calc(100svh - 76px);
   display: grid;
   align-content: center;
   padding: 5rem 0 3rem;
-  opacity: 0;
-  transform: translateY(26px);
   transition: opacity 0.9s ease, transform 0.9s ease;
 }
 
-.hero.loaded {
+.js .hero {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+.js .hero.loaded {
   opacity: 1;
   transform: translateY(0);
 }
@@ -204,6 +213,11 @@ body::before {
   inset: 0;
   background: linear-gradient(135deg, rgba(179, 255, 0, 0.09), transparent 40%, rgba(255, 255, 255, 0.03));
   pointer-events: none;
+}
+
+.hero-copy > * {
+  position: relative;
+  z-index: 1;
 }
 
 .eyebrow {
@@ -245,6 +259,7 @@ body::before {
 .btn {
   display: inline-block;
   width: fit-content;
+  max-width: 100%;
   margin-top: 1.35rem;
   padding: 0.86rem 1.5rem;
   border-radius: 0.7rem;
@@ -362,13 +377,17 @@ body::before {
 
 .reveal,
 .reveal-text {
-  opacity: 0;
-  transform: translateY(22px);
   transition: opacity 0.72s ease, transform 0.72s ease;
 }
 
-.reveal.in-view,
-.reveal-text.in-view {
+.js .reveal,
+.js .reveal-text {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.js .reveal.in-view,
+.js .reveal-text.in-view {
   opacity: 1;
   transform: translateY(0);
 }
@@ -406,12 +425,11 @@ body::before {
   opacity: 1;
 }
 
-@keyframes pulseTone {
-  from {
-    filter: saturate(1) brightness(1);
-  }
-  to {
-    filter: saturate(1.1) brightness(1.06);
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel,
+  .site-header,
+  .site-header.scrolled {
+    background: rgba(30, 30, 21, 0.9);
   }
 }
 
@@ -422,11 +440,28 @@ body::before {
 
   .hero {
     min-height: auto;
-    padding: 4.4rem 0 2.5rem;
+    align-content: start;
+    padding: 3rem 0 2.25rem;
+  }
+
+  .hero-copy {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 700px) {
+  body::before {
+    opacity: 0.16;
+  }
+
+  .bg-grid {
+    opacity: 0.22;
+  }
+
+  .parallax-bg {
+    display: none;
+  }
+
   .navbar {
     min-height: auto;
     padding: 0.95rem 0;
@@ -437,9 +472,36 @@ body::before {
     gap: 1rem;
   }
 
+  .hero {
+    padding: 2.4rem 0 2rem;
+  }
+
   .hero-copy,
   .contact-panel {
     border-radius: 22px;
+    padding: 1.15rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 11vw, 3.4rem);
+  }
+
+  .hero-text {
+    font-size: 0.98rem;
+  }
+
+  .hero-tags {
+    gap: 0.55rem;
+    margin-top: 1rem;
+  }
+
+  .hero-tags span {
+    font-size: 0.84rem;
+  }
+
+  .services,
+  .contact {
+    padding: 3.25rem 0;
   }
 }
 
