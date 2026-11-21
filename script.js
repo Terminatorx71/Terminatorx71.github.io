@@ -1,158 +1,38 @@
-﻿document.documentElement.classList.add("js");
+const menuButton = document.querySelector(".menu-toggle");
+const navLinks = document.querySelector(".nav-links");
 
-const header = document.querySelector(".site-header");
-const progressBar = document.querySelector(".scroll-progress");
-const hero = document.querySelector(".hero");
-const parallaxLayers = document.querySelectorAll(".parallax-layer");
-const revealItems = document.querySelectorAll(".reveal, .reveal-text");
+if (menuButton && navLinks) {
+  menuButton.addEventListener("click", () => {
+    const isOpen = menuButton.getAttribute("aria-expanded") === "true";
+    menuButton.setAttribute("aria-expanded", String(!isOpen));
+    menuButton.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
+    navLinks.classList.toggle("is-open", !isOpen);
+  });
 
-const dot = document.querySelector(".cursor-dot");
-const ring = document.querySelector(".cursor-ring");
-const interactiveTargets = document.querySelectorAll("a, button");
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const isCoarsePointer = window.matchMedia("(hover: none), (pointer: coarse)").matches;
-const enableParallax = !prefersReducedMotion && !isCoarsePointer;
-
-// Smooth section scrolling with sticky-header offset.
-document.querySelectorAll('a[href^="#"]').forEach((link) => {
-  link.addEventListener("click", (event) => {
-    const targetId = link.getAttribute("href");
-    if (!targetId || targetId === "#") {
-      return;
-    }
-
-    const target = document.querySelector(targetId);
-    if (!target) {
-      return;
-    }
-
-    event.preventDefault();
-    const offset = header ? header.offsetHeight : 0;
-    const y = target.getBoundingClientRect().top + window.scrollY - offset + 2;
-
-    window.scrollTo({
-      top: y,
-      behavior: prefersReducedMotion ? "auto" : "smooth",
+  navLinks.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open navigation");
+      navLinks.classList.remove("is-open");
     });
   });
-});
-
-// Hero load animation.
-if (hero) {
-  requestAnimationFrame(() => {
-    hero.classList.add("loaded");
-  });
 }
 
-// Reveal sections and text when they enter the viewport.
-if ("IntersectionObserver" in window && !prefersReducedMotion) {
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
+const videoFrame = document.querySelector(".video-frame");
+const videoTrigger = document.querySelector(".video-trigger");
 
-        entry.target.classList.add("in-view");
-        obs.unobserve(entry.target);
-      });
-    },
-    {
-      threshold: isCoarsePointer ? 0.08 : 0.18,
-      rootMargin: isCoarsePointer ? "0px 0px -18px 0px" : "0px 0px -42px 0px",
-    }
-  );
-
-  revealItems.forEach((item) => observer.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add("in-view"));
+if (videoFrame && videoTrigger) {
+  videoTrigger.addEventListener("click", () => {
+    const player = document.createElement("iframe");
+    player.src = "https://www.youtube.com/embed/YVzY_hSg2sU";
+    player.title = "Not quite a Horse | Unsloppable Art | EP02";
+    player.loading = "lazy";
+    player.allow = "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    player.allowFullscreen = true;
+    player.referrerPolicy = "strict-origin-when-cross-origin";
+    videoFrame.replaceChildren(player);
+  }, { once: true });
 }
 
-let ticking = false;
-
-function animateOnScroll() {
-  const scrollTop = window.scrollY;
-  const fullHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = fullHeight > 0 ? scrollTop / fullHeight : 0;
-
-  if (progressBar) {
-    progressBar.style.transform = `scaleX(${progress})`;
-  }
-
-  if (header) {
-    header.classList.toggle("scrolled", scrollTop > 16);
-  }
-
-  parallaxLayers.forEach((layer) => {
-    if (!enableParallax) {
-      layer.style.transform = "translateY(0)";
-      return;
-    }
-
-    const depth = Number(layer.dataset.depth) || 0;
-    layer.style.transform = `translateY(${scrollTop * depth}px)`;
-  });
-
-  ticking = false;
-}
-
-window.addEventListener("scroll", () => {
-  if (!ticking) {
-    requestAnimationFrame(animateOnScroll);
-    ticking = true;
-  }
-});
-
-animateOnScroll();
-
-// Cursor tuning:
-// - ringEase controls how delayed the circle is. Lower = more delay.
-// - dotHoverScale and ringHoverScale control hover enlargement.
-if (dot && ring && !isCoarsePointer) {
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let ringX = mouseX;
-  let ringY = mouseY;
-
-  let dotScale = 1;
-  let ringScale = 1;
-  const ringEase = 0.075;
-  const dotHoverScale = 1.28;
-  const ringHoverScale = 1.2;
-
-  window.addEventListener("mousemove", (event) => {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-
-    dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) scale(${dotScale})`;
-    dot.classList.add("visible");
-    ring.classList.add("visible");
-  });
-
-  interactiveTargets.forEach((target) => {
-    target.addEventListener("mouseenter", () => {
-      dotScale = dotHoverScale;
-      ringScale = ringHoverScale;
-      dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) scale(${dotScale})`;
-      ring.style.boxShadow = "0 0 32px rgba(179, 255, 0, 0.28)";
-      ring.style.borderColor = "rgba(179, 255, 0, 0.95)";
-    });
-
-    target.addEventListener("mouseleave", () => {
-      dotScale = 1;
-      ringScale = 1;
-      dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) scale(${dotScale})`;
-      ring.style.boxShadow = "0 0 24px rgba(179, 255, 0, 0.18)";
-      ring.style.borderColor = "rgba(179, 255, 0, 0.68)";
-    });
-  });
-
-  const followRing = () => {
-    ringX += (mouseX - ringX) * ringEase;
-    ringY += (mouseY - ringY) * ringEase;
-    ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%) scale(${ringScale})`;
-    requestAnimationFrame(followRing);
-  };
-
-  requestAnimationFrame(followRing);
-}
+const year = document.querySelector("#copyright-year");
+if (year) year.textContent = String(new Date().getFullYear());
